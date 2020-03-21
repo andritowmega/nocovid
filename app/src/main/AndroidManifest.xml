@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="pe.smarttech.covid19">
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/nocovid"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/nocovid"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AppCompat.NoActionBar">
+        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".LoginActivity" />
+
+        <meta-data
+            android:name="com.here.sdk.access_key_id"
+            android:value="hX_sT0qwKukg4c-HgvQVZg" />
+        <meta-data
+            android:name="com.here.sdk.access_key_secret"
+            android:value="wdFPGa3-vndOE5OpMF3VvACwpfOyuRtNpWV5uKO1XvCBTuRAZV06XkXqDHo2upEqDWanh8y6JyCuzE5Mj8huvw" />
+
+        <activity android:name=".HereActivity" />
+        <activity android:name=".MenuActivity" />
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

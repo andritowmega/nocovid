@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackgroundwhite"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    tools:context=".MenuActivity">
+
+    <LinearLayout
+        android:background="@color/colorSmartbusblue"
+        android:padding="5dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:textColor="@color/colorBackgroundwhite"
+            android:text="NOCOVID #YOMEQUEDOENCASA #ELPERUPRIMERO"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <androidx.appcompat.widget.AppCompatImageView
+        android:src="@drawable/nocovid"
+        android:layout_width="150dp"
+        android:layout_height="150dp"/>
+    <Button
+        android:id="@+id/mapa"
+        android:layout_marginTop="20dp"
+        android:textColor="@color/colorBackgroundwhite"
+        android:text="Mapa de Inicidencias"
+        android:background="@drawable/btn_circle_blue"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:layout_marginTop="20dp"
+        android:textColor="@color/colorBackgroundwhite"
+        android:text="Sintomas de COVID-19"
+        android:background="@drawable/btn_circle_blue"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:layout_marginTop="20dp"
+        android:textColor="@color/colorBackgroundwhite"
+        android:text="Recomendaciones"
+        android:background="@drawable/btn_circle_blue"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:layout_marginTop="20dp"
+        android:textColor="@color/colorBackgroundwhite"
+        android:text="Estadisticas"
+        android:background="@drawable/btn_circle_blue"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
