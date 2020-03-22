@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
             HiloTask();
             publishProgress(50);
             try {
+                Log.d("INTERNET ", "conectando");
                 if(conectadoAInternet()){
                     HiloTask();
                     Log.d("INTERNET ", "OK");
@@ -94,9 +95,30 @@ public class MainActivity extends AppCompatActivity {
     }
     public boolean conectadoAInternet()  throws InterruptedException, IOException
     {
-        //String comando = "ping -c 1 smartbus.xyz";
-        String comando = "ping -c 1 google.com";
-        return (Runtime.getRuntime().exec (comando).waitFor() == 0);
+        System.out.println("executeCommand");
+        Runtime runtime = Runtime.getRuntime();
+        try
+        {
+            Process  mIpAddrProcess = runtime.exec("/system/bin/ping -c google.com");
+            int mExitValue = mIpAddrProcess.waitFor();
+            System.out.println(" mExitValue "+mExitValue);
+            if(mExitValue==0){
+                return true;
+            }else{
+                return true;
+            }
+        }
+        catch (InterruptedException ignore)
+        {
+            ignore.printStackTrace();
+            System.out.println(" Exception:"+ignore);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            System.out.println(" Exception:"+e);
+        }
+        return false;
     }
     private void HiloTask()
     {
