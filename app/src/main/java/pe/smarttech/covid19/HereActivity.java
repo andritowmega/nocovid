@@ -18,6 +18,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.here.sdk.core.Anchor2D;
@@ -59,12 +61,16 @@ public class HereActivity extends AppCompatActivity {
     String response = "";
     String token = "";
     String URLbase = "http://nocovid.org.pe";
+    TextView titulo;
+    String muertes = "";
+    String infectados = "";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_here);
         // Get a MapViewLite instance from the layout.
         mapView = findViewById(R.id.map_view);
+        titulo = findViewById(R.id.titulo);
         mapView.onCreate(savedInstanceState);
         loadMapScene();
     }
@@ -77,9 +83,6 @@ public class HereActivity extends AppCompatActivity {
 
                     mapView.getCamera().setTarget(new GeoCoordinates(-16.39889,-71.5390867));
                     mapView.getCamera().setZoomLevel(14);
-
-
-
 
                     //YO
                     mapImageYo = MapImageFactory.fromResource(getBaseContext().getResources(), R.drawable.gpsyo);
@@ -220,6 +223,17 @@ public class HereActivity extends AppCompatActivity {
 
             if(result){
                 Log.d("HILO ","OK");
+                if(!muertes.equals("") && !muertes.equals("")){
+                    if(muertes.equals("vacio") || muertes.equals("error")){
+                        titulo.setText("NOCOVID.ORG.PE - No hay datos para esta ciudad");
+                    }
+                    else{
+                        titulo.setText("NOCOVID.ORG.PE - Muertes: "+muertes+" | Infectados: "+infectados);
+                    }
+                }
+                else{
+                    titulo.setText("NOCOVID.ORG.PE - No hay datos para esta ciudad");
+                }
             }
             else{
                 Log.d("HILO ","ERROR");
@@ -246,9 +260,16 @@ public class HereActivity extends AppCompatActivity {
             while ((line = reader.readLine()) != null) {
                 if(flag==0){
                     Log.d("RESPONSE","muertos: " + line);
+                    if(line.equals("vacio") || line.equals("error")){
+                        break;
+                    }
+                    else {
+                        muertes = line;
+                    }
                     flag++;
                 }
                 else if(flag==1){
+                    infectados = line;
                     Log.d("RESPONSE","infectados: " + line);
                     flag++;
                 }
