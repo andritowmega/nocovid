@@ -3,6 +3,7 @@ package pe.smarttech.covid19;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -25,6 +26,20 @@ public class WebViewActivity extends AppCompatActivity {
                             new InputStreamReader(
                                     openFileInput("ct.txt")));
             data = fin.readLine();
+            fin.close();
+        }
+        catch (Exception ex)
+        {
+            Toast.makeText(getApplicationContext(), "ERROR AL LEER data" + ex.toString(), Toast.LENGTH_SHORT).show();
+        }
+        try
+        {
+            BufferedReader fin =
+                    new BufferedReader(
+                            new InputStreamReader(
+                                    openFileInput("ctoken.txt")));
+            String token = fin.readLine();
+            Log.d("Token",token);
             fin.close();
         }
         catch (Exception ex)

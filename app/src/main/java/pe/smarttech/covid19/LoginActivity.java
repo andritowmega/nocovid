@@ -166,6 +166,16 @@ public class LoginActivity extends AppCompatActivity {
                 else{
                     titulo.setText("BIENVENIDO");
                     Log.d("TOKEN ",response);
+                    String filename = "ctoken.txt";
+                    String string= response;
+                    FileOutputStream outputStream;
+                    try{
+                        outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                        outputStream.write(string.getBytes());
+                        outputStream.close();
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                     Intent intent = new Intent(LoginActivity.this,MenuActivity.class);
                     startActivity(intent);
                     Toast toast = Toast.makeText(getApplicationContext(),"Bienvenido",Toast.LENGTH_LONG);

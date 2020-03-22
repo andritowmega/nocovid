@@ -25,6 +25,8 @@ import android.widget.Toast;
 import com.here.sdk.core.Anchor2D;
 import com.here.sdk.core.GeoCircle;
 import com.here.sdk.core.GeoCoordinates;
+import com.here.sdk.core.LanguageCode;
+import com.here.sdk.core.errors.InstantiationErrorException;
 import com.here.sdk.mapviewlite.MapCircle;
 import com.here.sdk.mapviewlite.MapCircleStyle;
 import com.here.sdk.mapviewlite.MapImage;
@@ -35,6 +37,10 @@ import com.here.sdk.mapviewlite.MapScene;
 import com.here.sdk.mapviewlite.MapStyle;
 import com.here.sdk.mapviewlite.MapViewLite;
 import com.here.sdk.mapviewlite.PixelFormat;
+import com.here.sdk.search.Address;
+import com.here.sdk.search.ReverseGeocodingEngine;
+import com.here.sdk.search.ReverseGeocodingOptions;
+import com.here.sdk.search.SearchError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,6 +70,7 @@ public class HereActivity extends AppCompatActivity {
     TextView titulo;
     String muertes = "";
     String infectados = "";
+    ReverseGeocodingEngine reverseGeocodingEngine;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -143,6 +150,14 @@ public class HereActivity extends AppCompatActivity {
                 yo = new MapMarker(yogeo);
                 yo.addImage(mapImageYo, new MapMarkerImageStyle());
                 mapView.getMapScene().addMapMarker(yo);
+
+                try {
+                    reverseGeocodingEngine = new ReverseGeocodingEngine();
+                } catch (InstantiationErrorException e) {
+                    new RuntimeException("Initialization of ReverseGeocodingEngine failed: " + e.error.name());
+                }
+                getAddressForCoordinates(yogeo);
+
             }
             else{
                 Log.i("GPS LOCATIONMANAGER", "Marker ya existe");
@@ -300,4 +315,23 @@ public class HereActivity extends AppCompatActivity {
         }
         //return response.toString();
     }
+    private void getAddressForCoordinates(GeoCoordinates geoCoordinates) {
+        // By default results are localized in EN_US.
+        ReverseGeocodingOptions reverseGeocodingOptions = new ReverseGeocodingOptions(LanguageCode.EN_GB);
+
+        reverseGeocodingEngine.searchAddress(
+                geoCoordinates, reverseGeocodingOptions, new ReverseGeocodingEngine.Callback() {
+                    @Override
+                    public void onSearchCompleted(@Nullable SearchError searchError,
+                                                  @Nullable Address address) {
+                        if (searchError != null) {
+
+                            Log.d("Reverse","Error: " + searchError.toString());
+                            return;
+                        }
+                        Log.d("Reverse","Dirección: " + address.addressText);
+                    }
+                });
+    }
+
 }
