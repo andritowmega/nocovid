@@ -90,10 +90,8 @@ public class HereActivity extends AppCompatActivity {
 
                     mapView.getCamera().setTarget(new GeoCoordinates(-16.39889,-71.5390867));
                     mapView.getCamera().setZoomLevel(14);
-
                     //YO
                     mapImageYo = MapImageFactory.fromResource(getBaseContext().getResources(), R.drawable.gpsyo);
-
                     milocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                     milocListener = new MiLocationListener();
                     //Permisos de geolocalización
@@ -130,6 +128,7 @@ public class HereActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
+        milocManager.removeUpdates(milocListener);
     }
     private MapCircle createMapCircle(GeoCoordinates marker) {
         float radiusInMeters = 300;
@@ -329,7 +328,7 @@ public class HereActivity extends AppCompatActivity {
                             Log.d("Reverse","Error: " + searchError.toString());
                             return;
                         }
-                        Log.d("Reverse","Dirección: " + address.addressText);
+                        Log.d("Reverse","Dirección: " + address.city + " " + address.country);
                     }
                 });
     }
