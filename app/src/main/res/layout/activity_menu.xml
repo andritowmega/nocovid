@@ -34,6 +34,15 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"/>
     <Button
+        android:id="@+id/noticias"
+        android:layout_marginTop="20dp"
+        android:textColor="@color/colorBackgroundwhite"
+        android:text="ÚLTIMAS NOTICIAS"
+        android:background="@drawable/btn_circle_blue"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/sintomas"
         android:layout_marginTop="20dp"
         android:textColor="@color/colorBackgroundwhite"
         android:text="Sintomas de COVID-19"
@@ -41,18 +50,13 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"/>
     <Button
-        android:layout_marginTop="20dp"
-        android:textColor="@color/colorBackgroundwhite"
-        android:text="Recomendaciones"
-        android:background="@drawable/btn_circle_blue"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"/>
-    <Button
+        android:id="@+id/estadisticas"
         android:layout_marginTop="20dp"
         android:textColor="@color/colorBackgroundwhite"
         android:text="Estadisticas"
         android:background="@drawable/btn_circle_blue"
         android:layout_width="300dp"
         android:layout_height="wrap_content"/>
+
 
 </LinearLayout>
