@@ -1,6 +1,7 @@
 package pe.smarttech.covid19;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -8,9 +9,12 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -33,6 +37,16 @@ import com.here.sdk.mapviewlite.PixelFormat;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
 public class HereActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
     private MapViewLite mapView;
@@ -42,6 +56,9 @@ public class HereActivity extends AppCompatActivity {
     double lng;
     MapMarker yo;
     MapImage mapImageYo;
+    String response = "";
+    String token = "";
+    String URLbase = "http://nocovid.org.pe";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,57 +74,15 @@ public class HereActivity extends AppCompatActivity {
             @Override
             public void onLoadScene(@Nullable MapScene.ErrorCode errorCode) {
                 if (errorCode == null) {
-                    GeoCoordinates marker1 = new GeoCoordinates(-16.390216,-71.5207997);
-                    GeoCoordinates marker2 = new GeoCoordinates(-16.435869,-71.5374447);
-                    GeoCoordinates marker3 = new GeoCoordinates(-16.444472,-71.5198577);
-                    GeoCoordinates marker4 = new GeoCoordinates(-16.455372,-71.5316107);
-                    GeoCoordinates marker5 = new GeoCoordinates(-16.388279,-71.5768887);
+
                     mapView.getCamera().setTarget(new GeoCoordinates(-16.39889,-71.5390867));
                     mapView.getCamera().setZoomLevel(14);
 
-                    MapImage mapImage = MapImageFactory.fromResource(getBaseContext().getResources(), R.drawable.markericon4);
-                    MapMarkerImageStyle mapMarkerImageStyle = new MapMarkerImageStyle();
-                    mapMarkerImageStyle.setAnchorPoint(new Anchor2D(0.5f, 1));
-                    MapScene mapScene = mapView.getMapScene();
 
-                    MapMarker mapMarker = new MapMarker(marker1);
-                    mapMarker.addImage(mapImage, mapMarkerImageStyle);
-                    MapCircle mapCircle = createMapCircle(marker1);
-
-                    mapScene.addMapCircle(mapCircle);
-
-                    MapMarker mapMarker2 = new MapMarker(marker2);
-                    mapMarker2.addImage(mapImage, mapMarkerImageStyle);
-                    MapCircle mapCircle2 = createMapCircle(marker2);
-                    mapScene.addMapCircle(mapCircle2);
-
-                    MapMarker mapMarker3 = new MapMarker(marker3);
-                    mapMarker3.addImage(mapImage, mapMarkerImageStyle);
-                    MapCircle mapCircle3 = createMapCircle(marker3);
-                    mapScene.addMapCircle(mapCircle3);
-
-                    MapMarker mapMarker4 = new MapMarker(marker4);
-                    mapMarker4.addImage(mapImage, mapMarkerImageStyle);
-                    MapCircle mapCircle4 = createMapCircle(marker4);
-                    mapScene.addMapCircle(mapCircle4);
-
-                    MapMarker mapMarker5 = new MapMarker(marker5);
-                    mapMarker5.addImage(mapImage, mapMarkerImageStyle);
-                    MapCircle mapCircle5 = createMapCircle(marker5);
-                    mapScene.addMapCircle(mapCircle5);
-
-                    mapView.getMapScene().addMapMarker(mapMarker);
-                    mapView.getMapScene().addMapMarker(mapMarker2);
-                    mapView.getMapScene().addMapMarker(mapMarker3);
-                    mapView.getMapScene().addMapMarker(mapMarker4);
-                    mapView.getMapScene().addMapMarker(mapMarker5);
 
 
                     //YO
                     mapImageYo = MapImageFactory.fromResource(getBaseContext().getResources(), R.drawable.gpsyo);
-
-
-
 
                     milocManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                     milocListener = new MiLocationListener();
@@ -121,6 +96,7 @@ public class HereActivity extends AppCompatActivity {
                         Log.d("GPS", "ok ");
                         milocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, milocListener);
                     }
+                    new CheckInfo().execute();
 
                 } else {
                     Log.d("HERE", "onLoadScene failed: " + errorCode.toString());
@@ -171,11 +147,7 @@ public class HereActivity extends AppCompatActivity {
                 yo.setCoordinates(yogeo);
                 Log.i("GPS LOCATIONMANAGER", "GPS , " + yo.getCoordinates().latitude + "," + yo.getCoordinates().longitude + "");
             }
-
-
-
         }
-
         public void onProviderDisabled(String provider) {
             Toast.makeText(getApplicationContext(), "Gps Desactivado", Toast.LENGTH_SHORT).show();
         }
@@ -186,5 +158,125 @@ public class HereActivity extends AppCompatActivity {
 
         public void onStatusChanged(String provider, int status, Bundle extras) {
         }
+    }
+    private class CheckInfo extends AsyncTask<Void, Integer, Boolean> {
+
+        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            if(token != null || !token.equals("")){
+                JSONObject data = null;
+                String urlParameters  = "ciudad=Arequipa";
+                Log.i("Parametros", urlParameters);
+                byte[] postData       = urlParameters.getBytes( StandardCharsets.UTF_8 );
+                int    postDataLength = postData.length;
+                URL url;
+                HttpURLConnection urlConnection = null;
+                try{
+                    url = new URL(URLbase+"/api/incidencias.php");
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setDoOutput( true );
+                    urlConnection.setInstanceFollowRedirects( false );
+                    urlConnection.setRequestMethod( "POST" );
+                    urlConnection.setRequestProperty( "Content-Type", "application/x-www-form-urlencoded");
+                    urlConnection.setRequestProperty( "charset", "utf-8");
+                    //urlConnection.setRequestProperty( "x-access-token", data.getString("token"));
+                    urlConnection.setRequestProperty( "Content-Length", Integer.toString( postDataLength ));
+                    urlConnection.setUseCaches( false );
+                    DataOutputStream wr = new DataOutputStream( urlConnection.getOutputStream());
+                    wr.write( postData );
+                    int responseCode = urlConnection.getResponseCode();
+                    if(responseCode == HttpURLConnection.HTTP_OK){
+                        publishProgress(100);
+                        readStream(urlConnection.getInputStream());
+                        return true;
+                    }
+                    else{
+                        Log.d("ERROR ","nO HAY RESPUESTA "+responseCode);
+                        return false;
+                    }
+                } catch (MalformedURLException e){
+                    Log.d("ERROR ",e.toString());
+                    return false;
+                } catch (IOException e){
+                    Log.d("ERROR ",e.toString());
+                    return false;
+                }
+            }
+            else return true;
+
+        }
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            int progreso = values[0].intValue();
+            if(progreso==100){ }
+        }
+        @Override
+        protected void onPreExecute() {
+
+        }
+        @Override
+        protected void onPostExecute(Boolean result) {
+
+            if(result){
+                Log.d("HILO ","OK");
+            }
+            else{
+                Log.d("HILO ","ERROR");
+            }
+        }
+        @Override
+        protected void onCancelled() {
+
+        }
+    }
+    private void readStream(InputStream in) {
+        BufferedReader reader = null;
+        StringBuffer response = new StringBuffer();
+        int flag = 0;
+        try {
+
+            MapImage mapImage = MapImageFactory.fromResource(getBaseContext().getResources(), R.drawable.markericon4);
+            MapMarkerImageStyle mapMarkerImageStyle = new MapMarkerImageStyle();
+            mapMarkerImageStyle.setAnchorPoint(new Anchor2D(0.5f, 1));
+            MapScene mapScene = mapView.getMapScene();
+
+            reader = new BufferedReader(new InputStreamReader(in));
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                if(flag==0){
+                    Log.d("RESPONSE","muertos: " + line);
+                    flag++;
+                }
+                else if(flag==1){
+                    Log.d("RESPONSE","infectados: " + line);
+                    flag++;
+                }
+                else if(flag>1){
+                    Log.d("RESPONSE","gps: " + line);
+                    String[] data = line.split(",");
+                    GeoCoordinates marker = new GeoCoordinates(Double.parseDouble(data[0]),Double.parseDouble(data[1]));
+                    MapMarker mapMarker = new MapMarker(marker);
+                    mapMarker.addImage(mapImage, mapMarkerImageStyle);
+                    MapCircle mapCircle = createMapCircle(marker);
+                    mapScene.addMapCircle(mapCircle);
+                    mapView.getMapScene().addMapMarker(mapMarker);
+                    Log.d("RESPONSE"," Marker Agregado");
+                    flag++;
+                }
+                //response.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        //return response.toString();
     }
 }
