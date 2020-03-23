@@ -22,6 +22,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.here.sdk.core.Anchor2D;
 import com.here.sdk.core.GeoCircle;
 import com.here.sdk.core.GeoCoordinates;
@@ -47,6 +53,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -70,6 +77,13 @@ public class HereActivity extends AppCompatActivity {
     TextView titulo;
     String muertes = "";
     String infectados = "";
+    String ciudad = "";
+    String pais = "";
+    private AdView mAdView;
+    private InterstitialAd mInterstitialAd;
+    boolean anuncio = true;
+
+
     ReverseGeocodingEngine reverseGeocodingEngine;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +93,20 @@ public class HereActivity extends AppCompatActivity {
         mapView = findViewById(R.id.map_view);
         titulo = findViewById(R.id.titulo);
         mapView.onCreate(savedInstanceState);
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+        //mAdView = findViewById(R.id.adView);
+        //AdRequest adRequest = new AdRequest.Builder().build();
+        //mAdView.loadAd(adRequest);
+        //mInterstitialAd = new InterstitialAd(this);
+        //mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        //mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+
+
         loadMapScene();
     }
     private void loadMapScene() {
@@ -104,8 +132,7 @@ public class HereActivity extends AppCompatActivity {
                         Log.d("GPS", "ok ");
                         milocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 3000, 0, milocListener);
                     }
-                    new CheckInfo().execute();
-
+                    //new CheckAds().execute();
                 } else {
                     Log.d("HERE", "onLoadScene failed: " + errorCode.toString());
                 }
@@ -183,7 +210,7 @@ public class HereActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
             if(token != null || !token.equals("")){
                 JSONObject data = null;
-                String urlParameters  = "ciudad=Arequipa";
+                String urlParameters  = "ciudad="+ciudad+"&pais="+pais;
                 Log.i("Parametros", urlParameters);
                 byte[] postData       = urlParameters.getBytes( StandardCharsets.UTF_8 );
                 int    postDataLength = postData.length;
@@ -242,7 +269,7 @@ public class HereActivity extends AppCompatActivity {
                         titulo.setText("NOCOVID.ORG.PE - No hay datos para esta ciudad");
                     }
                     else{
-                        titulo.setText("NOCOVID.ORG.PE - Muertes: "+muertes+" | Infectados: "+infectados);
+                        titulo.setText(ciudad+" - Muertes: "+muertes+" | Infectados: "+infectados);
                     }
                 }
                 else{
@@ -328,9 +355,55 @@ public class HereActivity extends AppCompatActivity {
                             Log.d("Reverse","Error: " + searchError.toString());
                             return;
                         }
-                        Log.d("Reverse","Dirección: " + address.city + " " + address.country);
+                        Log.d("Reverse","Dirección: "+address.addressText +" : "+ address.postalCode);
+                        ciudad = address.postalCode;
+                        pais = address.country;
+                        new CheckInfo().execute();
                     }
                 });
     }
+    private class CheckAds extends AsyncTask<Void, Integer, Boolean> {
 
+        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            HiloTask();
+            return true;
+        }
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            int progreso = values[0].intValue();
+            if(progreso==100){ }
+        }
+        @Override
+        protected void onPreExecute() {
+        }
+        @Override
+        protected void onPostExecute(Boolean result) {
+            Log.d("Response ",response);
+            if(result){
+                if (mInterstitialAd.isLoaded()) {
+                    mInterstitialAd.show();
+                } else {
+                    Log.d("TAG", "The interstitial wasn't loaded yet.");
+                    new CheckAds().execute();
+                }
+            }
+            else{
+
+                Log.d("TAG", "The interstitial wasn't loaded yet.");
+            }
+        }
+        @Override
+        protected void onCancelled() {
+
+        }
+    }
+    private void HiloTask()
+    {
+        try {
+            Thread.sleep(2000);
+        } catch(InterruptedException e) {}
+    }
 }
